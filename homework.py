@@ -1,3 +1,4 @@
+import inspect
 M_IN_KM : int = 1000 # метров в километре
 
 
@@ -5,7 +6,7 @@ M_IN_KM : int = 1000 # метров в километре
 class InfoMessage:
     """Информационное сообщение о тренировке."""
     def __init__(self,
-                 training_type: str, # тип тренировки (название)
+                 training_type: str, # тип тренировки, WLK - ходьба, RUN - бег, SWM - плавание
                  duration: float, # продолжительность тренировки
                  distance: float, # преодоленная за тренировку дистанция
                  speed: float, # средняя скорость во время тренировки
@@ -22,7 +23,6 @@ class InfoMessage:
 
 class Training:
     """Базовый класс тренировки."""
-    LEN_STEP : float = 0.65 # длина шага по умолчанию
 
     def __init__(self,
                  action: int, # количество действий (шагов, грибков и тд)
@@ -38,6 +38,7 @@ class Training:
         Вычисляет расстояние по формуле:
         количество_шагов * длина_шага / 1000 (метров в км)
         """
+        LEN_STEP : float = 0.65 # длина шага по умолчанию
         distance: float = self.action * LEN_STEP / M_IN_KM
         return distance
 
@@ -55,8 +56,13 @@ class Training:
         pass
 
     def show_training_info(self) -> InfoMessage:
-        """Вернуть информационное сообщение о выполненной тренировке."""
-        pass
+        """Вернуть информационное сообщение о выполненной тренировке.
+        Возвращаемое сообщение содержит информацию о типе и продолжительности
+        теренировки, а такеже о преодоленной дистанции, средней скорости
+        и потраченных за тренировку калориях"""
+        info: InfoMessage = InfoMessage('Неустановленный тип тренировки', self.duration, self.get_distance(),
+                                            self.get_mean_speed(),self.get_spent_calories())
+        return info
 
 
 class Running(Training):
@@ -72,6 +78,15 @@ class Running(Training):
         calories: float = (CALLORY_RUNNING_COEF1 * self.get_mean_speed() - 
             CALLORY_RUNNING_COEF2) * self.weight / M_IN_KM * self.duration
         return calories
+
+    def show_training_info(self) -> InfoMessage:
+        """Вернуть информационное сообщение о выполненной тренировке.
+        Возвращаемое сообщение содержит информацию о типе и продолжительности
+        теренировки, а такеже о преодоленной дистанции, средней скорости
+        и потраченных за тренировку калориях"""
+        info: InfoMessage = InfoMessage('Running', self.duration, self.get_distance(),
+                                            self.get_mean_speed(),self.get_spent_calories())
+        return info
 
 
 class SportsWalking(Training):
@@ -99,6 +114,14 @@ class SportsWalking(Training):
             CALLORY_WALKING_COEF3 * self.weight) * self.duration
         return calories
 
+    def show_training_info(self) -> InfoMessage:
+        """Вернуть информационное сообщение о выполненной тренировке.
+        Возвращаемое сообщение содержит информацию о типе и продолжительности
+        теренировки, а такеже о преодоленной дистанции, средней скорости
+        и потраченных за тренировку калориях"""
+        info: InfoMessage = InfoMessage('SportsWalking', self.duration, self.get_distance(),
+                                            self.get_mean_speed(),self.get_spent_calories())
+        return info
 
 class Swimming(Training):
     """Тренировка: плавание."""
@@ -130,22 +153,47 @@ class Swimming(Training):
         Вычисляет затраченные калории по формуле:
         (средняя_скорость + 1.1) * 2 * вес   
         """
-        CALLORY_SWIMING_COEF1 : int = 1.1 # коэф. для расчета калорий при плавании 1
-        CALLORY_SWIMING_COEF2 : int = 2 # коэф. для расчета калорий при плавании 2
-        calories: float = ((self.get_mean_speed() + CALLORY_SWIMING_COEF1) * 
-            CALLORY_SWIMING_COEF2 * self.weight)
+        CALLORY_SWIMMING_COEF1 : int = 1.1 # коэф. для расчета калорий при плавании 1
+        CALLORY_SWIMMING_COEF2 : int = 2 # коэф. для расчета калорий при плавании 2
+        calories: float = ((self.get_mean_speed() + CALLORY_SWIMMING_COEF1) * 
+            CALLORY_SWIMMING_COEF2 * self.weight)
         return calories
     
-
+    def show_training_info(self) -> InfoMessage:
+        """Вернуть информационное сообщение о выполненной тренировке.
+        Возвращаемое сообщение содержит информацию о типе и продолжительности
+        теренировки, а такеже о преодоленной дистанции, средней скорости
+        и потраченных за тренировку калориях"""
+        info: InfoMessage = InfoMessage('Swimming', self.duration, self.get_distance(),
+                                            self.get_mean_speed(),self.get_spent_calories())
+        return info
 
 def read_package(workout_type: str, data: list) -> Training:
-    """Прочитать данные полученные от датчиков."""
-    pass
+    """Прочитать данные полученные от датчиков.
+    Получает на вход тип тренировки и данные от датчиков.
+    Первый аргумент - тип тренировки, WLK - ходьба, RUN - бег, SWM - плавание
+    Второй аргумент - данные тренировки
+    Для ходьбы: количество шагов, время тренировки в часах, вес пользователя, рост пользователя
+    Для бега: количество шагов, время тренировки в часах, вес пользователя
+    Для плавания: количество гребков, время в часах, вес пользователя, длина бассейна,
+        сколько раз пользователь переплыл бассейн
+    
+    Возвращает созданный объект тренировки соответствующего класса
+    """
+    
+    if workout_type == 'WLK':
+        return SportsWalking(data[0],data[1],data[2],data[3])
+    elif workout_type == 'RUN':
+        return Running(data[0],data[1],data[2])
+    elif workout_type == 'SWM':
+        return Swimming(data[0],data[1],data[2],data[3],data[4])   
+    
 
 
 def main(training: Training) -> None:
     """Главная функция."""
-    pass
+    info: InfoMessage = training.show_training_info()
+    info.get_message()
 
 
 if __name__ == '__main__':
