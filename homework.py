@@ -1,6 +1,3 @@
-M_IN_KM: int = 1000  # метров в километре
-
-
 class InfoMessage:
     """Информационное сообщение о тренировке."""
     def __init__(self,
@@ -27,6 +24,9 @@ class InfoMessage:
 
 class Training:
     """Базовый класс тренировки."""
+    LEN_STEP: float = 0.65  # длина шага по умолчанию
+    M_IN_KM: int = 1000  # метров в километре
+
     def __init__(self,
                  action: int,  # количество действий (шагов, грибков и тд)
                  duration: float,  # продолжительность тренировки
@@ -42,6 +42,7 @@ class Training:
         количество_шагов * длина_шага / 1000 (метров в км)
         """
         LEN_STEP: float = 0.65  # длина шага по умолчанию
+        M_IN_KM: int = 1000  # метров в километре
         distance: float = self.action * LEN_STEP / M_IN_KM
         return distance
 
@@ -79,6 +80,7 @@ class Running(Training):
         Вычисляет затраченные калории по формуле:
         (18 * средняя_скорость - 20) * вес / 1000 * время_тренировки
         """
+        M_IN_KM: int = 1000  # метров в километре
         C_COEF1: int = 18  # коэф. для расчета калорий при беге 1
         C_COEF2: int = 20  # коэф. для расчета калорий при беге 2
         speed: float = self.get_mean_speed()  # средняя скорость
@@ -103,6 +105,8 @@ class Running(Training):
 
 class SportsWalking(Training):
     """Тренировка: спортивная ходьба."""
+    LEN_STEP: float = 0.64  # длина гребка
+
     def __init__(self,
                  action: int,  # количество действий (шагов, грибков и тд)
                  duration: float,  # продолжительность тренировки
@@ -126,7 +130,7 @@ class SportsWalking(Training):
         sp: float = self.get_mean_speed()
         dur: float = self.duration
         calories: float = 0
-        calories = (C_COEF_1 * sp + (sp * C_COEF_2 / hi) * C_COEF_3 * wi) * dur
+        calories = (C_COEF_1 * wi + (sp * C_COEF_2 / hi) * C_COEF_3 * wi) * dur
         return calories
 
     def show_training_info(self) -> InfoMessage:
@@ -145,7 +149,7 @@ class SportsWalking(Training):
 
 class Swimming(Training):
     """Тренировка: плавание."""
-    LEN_STEP: float = 0.65  # длина гребка
+    LEN_STEP: float = 1.38  # длина гребка
 
     def __init__(self,
                  action: int,  # количество действий (шагов, грибков и тд)
@@ -164,6 +168,7 @@ class Swimming(Training):
         длина_бассейна * количество_бассейнов / 1000 / время_тренировки
         (1000 - метров в км)
         """
+        M_IN_KM: int = 1000  # метров в километре
         speed: float = 0  # тип отдельно, чтобы влезть в 79 символов PEP8
         speed = self.length_pool * self.count_pool / M_IN_KM / self.duration
         return speed
@@ -218,11 +223,11 @@ def read_package(workout_type: str, data: list) -> Training:
 
     Возвращает созданный объект тренировки соответствующего класса
     """
-    if workout_type == 'WLK':
+    if workout_type == 'WLK' or workout_type == 'Walking':
         return SportsWalking(data[0], data[1], data[2], data[3])
-    elif workout_type == 'RUN':
+    elif workout_type == 'RUN' or workout_type == 'Running':
         return Running(data[0], data[1], data[2])
-    elif workout_type == 'SWM':
+    elif workout_type == 'SWM' or workout_type == 'Swimming':
         return Swimming(data[0], data[1], data[2], data[3], data[4])
 
 
