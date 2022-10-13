@@ -13,13 +13,13 @@ class InfoMessage:
         self.speed = speed
         self.calories = calories
 
-    def get_message(self) -> None:
+    def get_message(self) -> str:
         message: str = f'Тип тренировки: {self.training_type}; '
-        message += f'Длительность: {self.duration:.3f}; '
-        message += f'Дистанция: {self.distance:.3f} км; '
-        message += f'Ср. скорость: {self.speed:.3f} км/ч; '
-        message += f'Потрачено ккал: {self.calories:.3f}.'
-        print(message)
+        message += f'Длительность: {round(self.duration,3)}; '
+        message += f'Дистанция: {round(self.distance,3)} км; '
+        message += f'Ср. скорость: {round(self.speed,3)} км/ч; '
+        message += f'Потрачено ккал: {round(self.calories,3)}.'
+        return message
 
 
 class Training:
@@ -66,7 +66,8 @@ class Training:
         и потраченных за тренировку калориях"""
         info: InfoMessage = InfoMessage(
             'Неустановленный тип тренировки',
-            self.duration, self.get_distance(),
+            self.duration,
+            self.get_distance(),
             self.get_mean_speed(),
             self.get_spent_calories())
         return info
@@ -235,7 +236,8 @@ def main(training: Training) -> None:
     """Главная функция.
     Выводит информаци"""
     info: InfoMessage = training.show_training_info()
-    info.get_message()
+    message: str = info.get_message()
+    print(message)
 
 
 if __name__ == '__main__':
