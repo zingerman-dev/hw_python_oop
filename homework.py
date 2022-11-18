@@ -131,7 +131,7 @@ class SportsWalking(Training):
                             ** self.CALORIES_MEAN_SPEED_MULTIPLIER
                             / (self.height / self.CM_IN_M))
                             * self.CALORIES_SPEED_HEIGHT_MULTIPLIER
-                            * self.weight) * (self.duration * self.MIN_IN_H))
+                            * self.weight) * self.duration * self.MIN_IN_H)
         return calories
 
 
